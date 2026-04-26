@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メンテナンス中 | clusters-prj.com</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --bg-color: #f0f2f5;
+            --text-color: #444;
+            --accent-color: #28a745;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .icon-box {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 10px 0;
+            color: #111;
+        }
+
+        /* 完了予定時刻のスタイル */
+        .eta-container {
+            margin: 25px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 4px;
+            text-align: left;
+        }
+
+        .eta-label {
+            font-size: 12px;
+            color: #888;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .eta-time {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* 進捗バーのスタイル */
+        .progress-box {
+            margin: 20px 0;
+        }
+
+        .progress-bar-bg {
+            background: #eee;
+            border-radius: 10px;
+            height: 10px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--primary-color), #00c6ff);
+            height: 100%;
+            width: 70%; /* ここを進捗に合わせて変更 */
+            transition: width 0.5s ease-in-out;
+        }
+
+        .description {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #bbb;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon-box">🏗️</div>
+        <h1>ただいま整備中です</h1>
+        
+        <p class="description">
+            より快適にご利用いただけるよう、インフラの最適化を行っています。
+        </p>
+
+        <div class="eta-container">
+            <span class="eta-label">Expected Completion</span>
+            <span class="eta-time">2026年4月26日 15:00 頃</span>
+        </div>
+
+        <div class="progress-box">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888;">
+                <span>Progress</span>
+                <span>70%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: 70%;"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Admin: clusters-prj.com Support<br>
+            ご不便をおかけしますが、よろしくお願いいたします。
+        </div>
+    </div>
+</body>
+</html>
