@@ -1,1 +1,46 @@
+// --- 1. ホスト名の取得 ---
+local.file "hostname" {
+    filename = "/etc/hostname"
+}
 
+// --- 2. ログの自動収集 (ワイルドカード) ---
+loki.source.file "all_logs" {
+    targets = [
+        // 主要なログをまとめて対象にする
+        { "__path__" = "/var/log/*.log", "job" = "varlog" },
+        { "__path__" = "/var/log/syslog", "job" = "syslog" },
+        { "__path__" = "/var/log/auth.log", "job" = "auth" },
+        // マイクラサーバー等の個別ログがある場合もここに追加しておけばOK
+        { "__path__" = "/home/*/logs/*.log", "job" = "app_logs" },
+    ]
+    forward_to = [loki.process.add_labels.receiver]
+}
+
+// --- 3. 共通ラベル付与 ---
+loki.process "add_labels" {
+    stage.static_labels {
+        values = {
+            // 自動的にそのマシンのホスト名がラベルになる
+            container = trim(local.file.hostname.content),
+        }
+    }
+    
+    // もしログの中に 'error' や 'warning' が含まれていたらレベルを自動付与（簡易版）
+    stage.regex {
+        expression = `(?i)(?P<level>error|warn|info|debug)`
+    }
+    stage.labels {
+        values = {
+            level = "level",
+        }
+    }
+
+    forward_to = [loki.write.central_loki.receiver]
+}
+
+// --- 4. Loki送信先 ---
+loki.write "central_loki" {
+    endpoint {
+        url = "http://10.2.1.4:3100/loki/api/v1/push"
+    }
+}
