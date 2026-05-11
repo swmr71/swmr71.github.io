@@ -17,11 +17,12 @@ loki.source.file "all_logs" {
 }
 
 // --- 3. 共通ラベル付与 ---
+// --- 3. 共通ラベル付与 ---
 loki.process "add_labels" {
     stage.static_labels {
         values = {
-            // 自動的にそのマシンのホスト名がラベルになる
-            container = trim(local.file.hostname.content),
+            // trim を trim_space に変えるのが一番簡単です
+            container = trim_space(local.file.hostname.content),
         }
     }
     
