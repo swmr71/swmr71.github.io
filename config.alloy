@@ -3,30 +3,49 @@ local.file "hostname" {
     filename = "/etc/hostname"
 }
 
-// --- 2. ログの自動収集 (ワイルドカード) ---
+// --- 2. ログファイルの探索 (直書きとワイルドカードの混在) ---
+
+// /var/log/*.log 用
+local.file_match "var_logs" {
+    path_targets = [{"__path__" = "/var/log/*.log", "job" = "varlog"}]
+}
+
+// syslog 用 (直書き)
+local.file_match "syslog" {
+    path_targets = [{"__path__" = "/var/log/syslog", "job" = "syslog"}]
+}
+
+// auth.log 用 (直書き)
+local.file_match "auth" {
+    path_targets = [{"__path__" = "/var/log/auth.log", "job" = "auth"}]
+}
+
+// アプリログ用 (ワイルドカード)
+local.file_match "app_logs" {
+    path_targets = [{"__path__" = "/home/*/logs/*.log", "job" = "app_logs"}]
+}
+
+// --- 3. ログの収集 ---
 loki.source.file "all_logs" {
-    targets = [
-        // 主要なログをまとめて対象にする
-        { "__path__" = "/var/log/*.log", "job" = "varlog" },
-        { "__path__" = "/var/log/syslog", "job" = "syslog" },
-        { "__path__" = "/var/log/auth.log", "job" = "auth" },
-        // マイクラサーバー等の個別ログがある場合もここに追加しておけばOK
-        { "__path__" = "/home/*/logs/*.log", "job" = "app_logs" },
-    ]
+    // すべての探索結果を concat で一つにまとめる
+    targets = concat(
+        local.file_match.var_logs.targets,
+        local.file_match.syslog.targets,
+        local.file_match.auth.targets,
+        local.file_match.app_logs.targets,
+    )
     forward_to = [loki.process.add_labels.receiver]
 }
 
-// --- 3. 共通ラベル付与 ---
-// --- 3. 共通ラベル付与 ---
+// --- 4. 共通ラベル付与 & ログレベル抽出 ---
 loki.process "add_labels" {
     stage.static_labels {
         values = {
-            // trim を trim_space に変えるのが一番簡単です
             container = trim_space(local.file.hostname.content),
         }
     }
     
-    // もしログの中に 'error' や 'warning' が含まれていたらレベルを自動付与（簡易版）
+    // ログ内からレベルを抽出
     stage.regex {
         expression = `(?i)(?P<level>error|warn|info|debug)`
     }
@@ -39,7 +58,7 @@ loki.process "add_labels" {
     forward_to = [loki.write.central_loki.receiver]
 }
 
-// --- 4. Loki送信先 ---
+// --- 5. Loki送信先 ---
 loki.write "central_loki" {
     endpoint {
         url = "http://10.2.1.4:3100/loki/api/v1/push"
